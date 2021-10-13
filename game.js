@@ -60,9 +60,132 @@ class Actor {
     }
 
     isIntersect(actor) {
-        if (!(actor instanceof Actor)) throw new Error("Нужно передать Actor")
-        if (this === actor) return false
+        if (!(actor instanceof Actor)) {
+            throw new Error("Нужно передать Actor")
+        }
+        if (this === actor) {
+            return false
+        }
         return this.left < actor.right && this.right > actor.left && this.top < actor.bottom && this.bottom > actor.top;
     }
 
+}
+
+class Level {
+    constructor(grid=[], actors=[]) {
+        this.grid = grid;
+        this.actors = actors;
+        if (actors) {
+            this.player = actors.find((x)=>x.type==="player")
+        }
+        this.height = grid.length;
+        this.width = this.grid.reduce(function (memo, el) {
+            if (el.length > memo) {
+                memo = el.length
+            }
+            return memo
+        }, 0);
+        this.status = null;
+        this.finishDelay = 1;
+    }
+
+    isFinished() {
+        return this.status !== null && this.finishDelay < 0;
+    }
+
+    actorAt(actor) {
+        if (!(actor instanceof Actor)) {
+            throw new Error("Нужно передать Actor");
+        }
+
+        for (let level_actor of this.actors) {
+            if (level_actor.isIntersect(actor)) return level_actor;
+        }
+
+        return undefined;
+    }
+
+    obstacleAt(pos, size) {
+        if (!(pos instanceof Vector)) {
+            throw new Error("Нужно передать вектор!");
+        }
+        if (!(size instanceof Vector)) {
+            throw new Error("Нужно передать вектор!");
+        }
+        if ((pos.y + size.y) > this.height) {
+            return "lava"
+        }
+        if (pos.x < 0 || pos.y < 0 || (pos.x + size.x) > this.width) {
+            return "wall"
+        }
+        for (let y = Math.floor(pos.y); y < pos.y + size.y; y++) {
+            for (let x = Math.floor(pos.x); x < pos.x + size.x; x++) {
+                let obj = this.grid[y][x]
+                if (obj !== undefined) return obj
+            }
+        }
+    }
+
+    removeActor(actor) {
+        if (this.actors.indexOf(actor) >= 0) {
+            this.actors.splice(this.actors.indexOf(actor), 1);
+        }
+    }
+
+    noMoreActors(type) {
+        return !this.actors.some(elem => elem.type === type);
+    }
+
+    playerTouched(type, actor) {
+        if (this.status !== null) {
+            return;
+        }
+        if (type === "lava" || type === "fireball") {
+            this.status = "lost";
+        }
+        else {
+            this.removeActor(actor);
+            if (!this.noMoreActors("coin")) {
+                this.status = "won";
+            }
+        }
+    }
+}
+
+class LevelParser {
+    constructor(symbols) {
+        this.symbols = symbols;
+    }
+
+    actorFromSymbol(symbol) {
+        if (!symbol || !this.symbols[symbol]) {
+            return undefined;
+        }
+        return this.symbols[symbol];
+    }
+
+    obstacleFromSymbol(symbol) {
+        if (symbol === "x") {
+            return "wall";
+        }
+        if (symbol === "!") {
+            return "lava";
+        }
+    }
+
+    createGrid(plan) {
+        if (plan.length === 0) {
+            return [];
+        }
+
+        let array = []
+        plan.forEach((str)=> {
+            let new_str = array[array.push([])-1]
+            for (let i = 0; i < str.length; i++) {
+                let symbol = str.charAt(i);
+                new_str.push(this.obstacleFromSymbol(symbol));
+            }
+        })
+        return array;
+    }
 }
