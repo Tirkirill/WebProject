@@ -40,28 +40,29 @@ class Actor {
         this.speed = speed;
         this._type= "actor";
     }
-
     get type() {
         return this._type;
     }
-
     get left() {
         return this.pos.x;
     }
-
     get right() {
         return this.pos.x + this.size.x;
     }
-
     get bottom() {
         return this.pos.y + this.size.y;
     }
-
     get top() {
         return this.pos.y;
     }
-
     act() {
 
     }
+
+    isIntersect(actor) {
+        if (!(actor instanceof Actor)) throw new Error("Нужно передать Actor")
+        if (this === actor) return false
+        return this.left < actor.right && this.right > actor.left && this.top < actor.bottom && this.bottom > actor.top;
+    }
+
 }
