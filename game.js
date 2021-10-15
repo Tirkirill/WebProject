@@ -210,8 +210,7 @@ class LevelParser {
     }
 
     parse(plan) {
-        let level = new Level(this.createGrid(plan), this.createActors(plan));
-        return level;
+        return new Level(this.createGrid(plan), this.createActors(plan));
     }
 }
 
@@ -264,5 +263,15 @@ class FireRain extends Fireball {
 
     handleObstacle() {
         this.pos = this.beg_pos;
+    }
+}
+
+class Coin extends Actor {
+    constructor(pos = new Vector(0, 0)) {
+        super(new Vector(pos.x + 0.2, pos.y + 0.1), new Vector(0.6, 0.6));
+        this._type = "coin";
+        this.springSpeed = 8;
+        this.springDist = 0.07;
+        this.spring = Math.random() * (2 * Math.PI + 1);
     }
 }
