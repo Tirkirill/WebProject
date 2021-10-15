@@ -255,3 +255,14 @@ class VerticalFireball extends Fireball {
         super(pos, new Vector(0, 2));
     }
 }
+
+class FireRain extends Fireball {
+    constructor(pos = new Vector(0, 0)) {
+        super(pos, new Vector(0, 3));
+        this.beg_pos = pos;
+    }
+
+    handleObstacle() {
+        this.pos = this.beg_pos;
+    }
+}
