@@ -1,14 +1,14 @@
 'use strict';
 
 class Vector {
-    constructor(x=0, y=0) {
+    constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
 
     plus(vector) {
         if (!(vector instanceof Vector)) {
-            throw new Error("Нужно передать вектор!"); 
+            throw new Error("Нужно передать вектор!");
         }
 
         return new Vector(this.x + vector.x, this.y + vector.y);
@@ -19,12 +19,12 @@ class Vector {
             throw new Error("Нужно передать число!");
         }
 
-        return new Vector(this.x*n, this.y*n);
+        return new Vector(this.x * n, this.y * n);
     }
 }
 
 class Actor {
-    constructor(pos=new Vector(0,0), size=new Vector(1,1), speed=new Vector(0,0)) {
+    constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
         if (!(pos instanceof Vector)) {
             throw new Error("Нужно передать вектор!");
         }
@@ -38,7 +38,7 @@ class Actor {
         this.pos = pos;
         this.size = size;
         this.speed = speed;
-        this._type= "actor";
+        this._type = "actor";
     }
     get type() {
         return this._type;
@@ -72,11 +72,11 @@ class Actor {
 }
 
 class Level {
-    constructor(grid=[], actors=[]) {
+    constructor(grid = [], actors = []) {
         this.grid = grid;
         this.actors = actors;
         if (actors) {
-            this.player = actors.find((x)=>x.type==="player")
+            this.player = actors.find((x) => x.type === "player")
         }
         this.height = grid.length;
         this.width = this.grid.reduce(function (memo, el) {
@@ -179,13 +179,38 @@ class LevelParser {
         }
 
         let array = []
-        plan.forEach((str)=> {
-            let new_str = array[array.push([])-1]
+        plan.forEach((str) => {
+            let new_str = array[array.push([]) - 1]
             for (let i = 0; i < str.length; i++) {
                 let symbol = str.charAt(i);
                 new_str.push(this.obstacleFromSymbol(symbol));
             }
         })
         return array;
+    }
+
+    createActors(arrStr) {
+        let actors = [];
+        if (!this.symbols) return actors;
+        for (let j = 0; j < arrStr.length; j++) {
+            let str = arrStr[j];
+            for (let i = 0; i < str.length; i++) {
+                let symbol = str[i];
+                if (typeof this.symbols[symbol] === "function") {
+                    let type = Object(this.actorFromSymbol(symbol));
+                    let actor = new type(new Vector(i, j));
+                    if (actor instanceof Actor) {
+                        actors.push(actor);
+                    } 
+                }
+            }
+        }
+
+        return actors;
+    }
+
+    parse(plan) {
+        let level = new Level(this.createGrid(plan), this.createActors(plan));
+        return level;
     }
 }
