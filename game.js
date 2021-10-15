@@ -143,10 +143,10 @@ class Level {
         if (type === "lava" || type === "fireball") {
             this.status = "lost";
         }
-        else {
+        if (type === "coin" && actor.type === "coin") {
             this.removeActor(actor);
-            if (!this.noMoreActors("coin")) {
-                this.status = "won";
+            if (this.noMoreActors("coin")) {
+                return this.status = "won";
             }
         }
     }
@@ -223,7 +223,6 @@ class Fireball extends Actor {
     getNextPosition(time=1) {
         let x = this.pos.x + this.speed.x * time;
         let y = this.pos.y + this.speed.y * time;
-        console.log(x, y);
         return new Vector(x, y);
     }
 
@@ -300,3 +299,18 @@ class Player extends Actor {
         this._type = "player";
     }
 }
+
+let actorDict = {
+    '@': Player,
+    'v': FireRain,
+    'o': Coin,
+    '|': VerticalFireball,
+    '=': HorizontalFireball
+}
+let parser = new LevelParser(actorDict);
+loadLevels()
+    .then(value => {
+        let schemas = JSON.parse(String(value));
+        runGame(schemas, parser, DOMDisplay)
+            .then(() => alert('Вы выиграли приз!'));
+    })
