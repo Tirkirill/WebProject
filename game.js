@@ -272,6 +272,11 @@ class Coin extends Actor {
         this._type = "coin";
         this.springSpeed = 8;
         this.springDist = 0.07;
-        this.spring = Math.random() * (2 * Math.PI + 1);
+        this.spring = Math.random() * Math.PI * 2;
     }
+
+    updateSpring(time=1) {
+        this.spring = this.spring + (this.springSpeed * time)
+    }
+
 }
